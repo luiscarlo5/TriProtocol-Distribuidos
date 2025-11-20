@@ -1,7 +1,7 @@
 
 ---
 
-# Sistemas Distribuídos
+# TriProtocol | Sistemas Distribuídos
 
 ## **String | JSON | Protobuf**
 
