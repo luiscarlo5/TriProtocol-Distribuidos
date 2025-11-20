@@ -250,7 +250,7 @@ As mensagens seguem este esquema:
 
 ⇒ Tentar conectar (timeout 5s).
 
-⇒ Enviar JSON AUTH.
+⇒ Enviar Protobuf AUTH.
 
 ⇒ Receber token.
 
