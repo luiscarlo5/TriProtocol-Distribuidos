@@ -5,7 +5,7 @@ calculando **médias**, **desvios padrão** e gerando visualizações.
 
 ------------------------------------------------------------------------
 
-## \## 1. Leitura de Bibliotecas
+## **Leitura de Bibliotecas**
 
 ``` python
 import pandas as pd
@@ -13,36 +13,9 @@ from pathlib import Path
 import seaborn as sns
 import matplotlib.pyplot as plt
 ```
-
 ------------------------------------------------------------------------
 
-## \## 2. Visualização de exemplo (Protobuf -- operação soma)
-
-``` python
-df_protobuf[df_protobuf['operacao'] == 'soma']
-df_protobuf.shape
-```
-
-------------------------------------------------------------------------
-
-## \## 3. Impressão das médias por operação
-
-O código itera por cada tipo de operação e cada protocolo, calculando a
-média:
-
-``` python
-nomes = ["String", "JSON", "Protobuf"]
-
-for tipo in ['echo', 'soma', 'status', 'historico', 'timestamp']:
-    print(f"\nOperação {tipo.upper()}")
-    for nome, df_main in zip(nomes, df_todos):
-        df_aux = df_main[df_todos[0]['operacao'] == tipo ]
-        print(f"Protocolo {nome}: Média {round(df_aux['tempo_resposta'].mean(), 3)}")
-```
-
-------------------------------------------------------------------------
-
-## \## 4. Construção do DataFrame consolidado
+## **Construção do DataFrame consolidado**
 
 O código calcula **média** e **desvio padrão** de `tempo_resposta`:
 
@@ -68,7 +41,7 @@ print(df_resultado)
 
 ------------------------------------------------------------------------
 
-## \## 5. Gráficos de média por operação
+## **Gráficos de média por operação**
 
 ``` python
 sns.barplot(
@@ -83,7 +56,7 @@ sns.barplot(
 
 ------------------------------------------------------------------------
 
-## \## 6. Gráficos de desvio padrão por operação
+## **Gráficos de desvio padrão por operação**
 
 ``` python
 sns.barplot(
@@ -98,7 +71,7 @@ sns.barplot(
 
 ------------------------------------------------------------------------
 
-## \## 7. Comparação por protocolo (FacetGrid)
+## **Comparação por protocolo**
 
 O notebook cria grids separados para cada protocolo:
 
@@ -120,9 +93,9 @@ O mesmo é repetido para o **desvio padrão**.
 
 ------------------------------------------------------------------------
 
-## \## 8. Conclusão
+## **Conclusão**
 
-O notebook fornece:
+O notebook fornece: \##
 
 -   Comparação clara entre protocolos\
 -   Média e variação do tempo de resposta\
