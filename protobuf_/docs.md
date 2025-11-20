@@ -247,9 +247,3 @@ As mensagens seguem este esquema:
 6. Encerrar com `LOGOUT`
 
 ---
-
-Se desejar, posso adicionar:
-
-* Diagrama do protocolo
-* Exemplos reais de mensagens JSON
-* Tabela comparativa entre a versão JSON e Protobuf
