@@ -192,16 +192,22 @@ O código utiliza `split("|")` para quebrar a resposta em partes.
 
 ## **9. Fluxo completo resumido**
 
-1. Criar socket.
-2. Tentar conectar (máx 5 segundos).
-3. Enviar AUTH.
-4. Receber TOKEN.
-5. Exibir menu.
-6. Enviar operações.
-7. Receber e exibir respostas.
-8. Enviar LOGOUT.
-9. Fechar conexão.
+⇒ Criar socket.
+
+⇒ Tentar conectar (máx 5 segundos).
+
+⇒ Enviar AUTH.
+
+⇒ Receber TOKEN.
+
+⇒ Exibir menu.
+
+⇒ Enviar operações.
+
+⇒ Receber e exibir respostas.
+
+⇒Enviar LOGOUT.
+
+⇒Fechar conexão.
 
 ---
-
-Se desejar, posso gerar uma versão mais formal, mais detalhada ou com tabelas.
