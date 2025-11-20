@@ -200,15 +200,24 @@ Fluxo principal do programa.
 
 ### **Fluxo**
 
-1. Conecta ao servidor usando TCP
-2. Envia `INFO`
-3. Autentica → obtém token
-4. Entra no menu de operações
-5. Usuário escolhe até fazer logout
+1. Cria socket TCP.
+2. Tenta conectar ao servidor por até 5 segundos.
+3. Autentica.
+4. Abre menu.
+5. Finaliza com logout e fechamento do socket.
+6. Fluxo interno
+7. Criar socket.
+8. Loop de conexão com timeout de 5s.
+9. Se conectar: enviar AUTH.
+10. Receber token.
+11. Abrir menu interativo.
+12. Usuário escolhe logout.
+13. Fechar conexão.
+
 
 ---
 
-# Formato das Mensagens Protocol Buffers
+## Formato das Mensagens Protocol Buffers
 
 As mensagens seguem este esquema:
 
@@ -235,15 +244,22 @@ As mensagens seguem este esquema:
 * `erro.codigo`
 * `erro.mensagem`
 
----
+## **9. Fluxo completo resumido**
 
-# Fluxo Geral da Comunicação
+⇒ Criar socket TCP.
 
-1. Conectar via TCP
-2. Enviar `INFO`
-3. Enviar `AUTH`
-4. Receber `token`
-5. Interagir usando operações
-6. Encerrar com `LOGOUT`
+⇒ Tentar conectar (timeout 5s).
 
----
+⇒ Enviar JSON AUTH.
+
+⇒ Receber token.
+
+⇒ Abrir menu de operações.
+
+⇒ Enviar operações via Protobuf.
+
+⇒ Receber respostas estruturadas.
+
+⇒ Enviar LOGOUT.
+
+⇒ Encerrar conexão.
