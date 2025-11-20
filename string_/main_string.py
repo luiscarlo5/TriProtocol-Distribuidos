@@ -27,7 +27,7 @@ def receber_resposta(sock):
         print("Erro ao receber resposta:", e)
         raise
 
-def autenticar(sock, aluno_id, print_response=True):
+def autenticar(sock, aluno_id, print_resposta=True):
     try:
         timestamp = datetime.now().isoformat()
 
@@ -38,16 +38,16 @@ def autenticar(sock, aluno_id, print_response=True):
         # tempo envio
         t0 = time.time()
         enviar_mensagem(sock, msg)
-        t_env = round(time.time() - t0, 4)
+        tempo_envio = round(time.time() - t0, 3)
 
         # tempo resposta
         t0_r = time.time()
         resposta = receber_resposta(sock)
-        t_resp = round(time.time() - t0_r, 4)
+        tempo_resposta = round(time.time() - t0_r, 3)
 
-        tempo_total = round(t_env + t_resp, 4)
+        tempo_total = round(tempo_envio + tempo_resposta, 3)
 
-        if print_response:
+        if print_resposta:
             print("\nRESPOSTA AUTH")
             print(resposta)
             print(f"Tempo total AUTH: {tempo_total}s\n")
@@ -58,21 +58,21 @@ def autenticar(sock, aluno_id, print_response=True):
             if parte.startswith("token="):
                 token = parte.split("=")[1]
 
-        return resposta, token, tempo_total, t_env, t_resp
+        return resposta, token, tempo_total, tempo_envio, tempo_resposta
 
     except Exception as e:
         print("Erro na autenticação:", e)
         return None, None, None, None, None
 
-def operacoes_disponiveis(sock, token, operacao, parametros=None, print_response=True):
+def operacoes_disponiveis(sock, token, operacao, parametros=None, print_resposta=True):
     try:
         timestamp = datetime.now().isoformat()
 
 
 
-
-        chave_parametro = next(iter(parametros))
-        valor_parametro = parametros[chave_parametro]
+        if parametros is not None:
+            chave_parametro = next(iter(parametros))
+            valor_parametro = parametros[chave_parametro]
         # chave_parametro: valor_parametro
         # Monta mensagem no formato padrão
         if operacao =='timestamp':
@@ -83,16 +83,16 @@ def operacoes_disponiveis(sock, token, operacao, parametros=None, print_response
         # tempo envio
         t0 = time.time()
         enviar_mensagem(sock, msg)
-        t_env = round(time.time() - t0, 4)
+        tempo_envio = round(time.time() - t0, 3)
 
         # tempo resposta
         t0_r = time.time()
         resposta = receber_resposta(sock)
-        t_resp = round(time.time() - t0_r, 4)
+        tempo_resposta = round(time.time() - t0_r, 3)
 
-        tempo_total = round(t_env + t_resp, 4)
+        tempo_total = round(tempo_envio + tempo_resposta, 3)
 
-        if print_response:
+        if print_resposta:
             print(f"\nRESPOSTA {operacao.upper()}:")
             # resposta = resposta.strip()
             for row in resposta.split("|"):
@@ -100,14 +100,14 @@ def operacoes_disponiveis(sock, token, operacao, parametros=None, print_response
             # print(resposta)
             print(f"Tempo total {operacao.upper()}: {tempo_total}s")
 
-        return resposta, tempo_total, t_env, t_resp
+        return resposta, tempo_total, tempo_envio, tempo_resposta
 
     except Exception as e:
         print(f"Erro na operação {operacao}:", e)
         return None, None, None, None
 
 
-def logout(sock, token, print_response=True):
+def logout(sock, token, print_resposta=True):
     try:
         timestamp = datetime.now().isoformat()
         msg = f"LOGOUT|token={token}|timestamp={timestamp}|FIM"
@@ -115,21 +115,21 @@ def logout(sock, token, print_response=True):
         # envio
         t0 = time.time()
         enviar_mensagem(sock, msg)
-        t_env = round(time.time() - t0, 4)
+        tempo_envio = round(time.time() - t0, 3)
 
         # resposta
         t0_r = time.time()
         resposta = receber_resposta(sock)
-        t_resp = round(time.time() - t0_r, 4)
+        tempo_rsposta = round(time.time() - t0_r, 3)
 
-        tempo_total = round(t_env + t_resp, 4)
+        tempo_total = round(tempo_envio + tempo_rsposta, 3)
 
-        if print_response:
-            print("\n=== RESPOSTA LOGOUT ===")
+        if print_resposta:
+            print("\nRESPOSTA LOGOUT")
             print(resposta)
             print(f"Tempo total LOGOUT: {tempo_total}s")
 
-        return resposta, tempo_total, t_env, t_resp
+        return resposta, tempo_total, tempo_envio, tempo_rsposta
 
     except Exception as e:
         print("Erro no LOGOUT:", e)

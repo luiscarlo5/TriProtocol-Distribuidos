@@ -39,9 +39,6 @@ Cliente TCP em Python para comunicação com servidor conforme especificações 
     print(json_str)
 """
 
-
-
-
 import socket
 from datetime import datetime
 import json
@@ -70,7 +67,7 @@ def receber_resposta(sock):
         raise
 
 
-def autenticar(sock, aluno_id, print_response=True):
+def autenticar(sock, aluno_id, print_resposta=True):
     try:
         timestamp = datetime.now().isoformat()
         msg_json = {
@@ -95,7 +92,7 @@ def autenticar(sock, aluno_id, print_response=True):
 
         tempo_total = round(t1_ - t0, 3)
 
-        if print_response:
+        if print_resposta:
             print("\nRESPOSTA AUTH2")
             # print(resposta)
             print(json.dumps(resposta, indent=4, ensure_ascii=False))
@@ -108,14 +105,48 @@ def autenticar(sock, aluno_id, print_response=True):
         print("Erro na autenticação:", e)
         return None, None, None, None, None
 
+def enviar_info(sock, tipo="basico", print_resposta=True):
 
-def operacoes_disponiveis(sock, token, operacao, parametros=None, print_response=True):
+    try:
+        timestamp = datetime.now().isoformat()
+        msg_json =  {   
+                            "tipo": tipo,
+                            "operacao": "info",
+                            "timestamp": timestamp
+                    } 
+
+        msg = json.dumps(msg_json)
+
+        t0 = time.time()
+        enviar_mensagem(sock, msg)
+        t1 = time.time()
+        tempo_envio = round(t1 - t0, 3)
+
+        t0_ = time.time()
+        resposta = receber_resposta(sock)
+        t1_ = time.time()
+        tempo_resposta = round(t1_ - t0_, 3)
+
+        tempo_total = round(t1_ - t0, 3)
+
+        if print_resposta:
+            print(f"\nRESPOSTA INFO:")
+            print(json.dumps(resposta, indent=4, ensure_ascii=False))
+
+            print(f"Tempo total INFO: {tempo_total}s")
+
+        return resposta, tempo_total, tempo_envio, tempo_resposta
+    except Exception as e:
+        print("Erro ao enviar INFO:", e)
+        return None, None, None, None
+
+def operacoes_disponiveis(sock, token, operacao, parametros=None, print_resposta=True):
     try:
         timestamp = datetime.now().isoformat()
 
-
-        chave_parametro = next(iter(parametros))
-        valor_parametro = parametros[chave_parametro]
+        if parametros != None:
+            chave_parametro = next(iter(parametros))
+            valor_parametro = parametros[chave_parametro]
         if operacao !='timestamp':
             msg_json =  {   "token": token,
                             "tipo": "operacao",
@@ -149,12 +180,14 @@ def operacoes_disponiveis(sock, token, operacao, parametros=None, print_response
 
         tempo_total = round(t1_ - t0, 3)
 
-        if print_response:
+        if print_resposta:
             print(f"\nRESPOSTA {operacao.upper()}:")
             print(json.dumps(resposta, indent=4, ensure_ascii=False))
 
             print(f"Tempo total {operacao.upper()}: {tempo_total}s")
-
+        # print("Tempo envio:", tempo_envio)
+        # print("Tempo resposta:", tempo_resposta)        
+        # print("Tempo total:", tempo_total)
         return resposta, tempo_total, tempo_envio, tempo_resposta
 
     except Exception as e:
@@ -162,7 +195,7 @@ def operacoes_disponiveis(sock, token, operacao, parametros=None, print_response
         return None, None, None, None
 
 
-def logout(sock, token, print_response=True):
+def logout(sock, token, print_resposta=True):
     try:
         timestamp = datetime.now().isoformat()
 
@@ -188,7 +221,7 @@ def logout(sock, token, print_response=True):
 
         tempo_total = round(t1_ - t0, 3)
 
-        if print_response:
+        if print_resposta:
             print("\nRESPOSTA LOGOUT:")
             # print(resposta)
             print(json.dumps(resposta, indent=4, ensure_ascii=False))
@@ -291,6 +324,7 @@ def main():
                     return
 
         # Autenticação
+        enviar_info(sock, tipo="basico")
         resposta_auth, token, _, _, _ = autenticar(sock, "509022")
         if not token:
             print("Falha na autenticação.")

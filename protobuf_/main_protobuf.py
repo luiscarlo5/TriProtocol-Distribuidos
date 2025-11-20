@@ -10,7 +10,10 @@ import socket
 import struct
 from datetime import datetime
 from google.protobuf import json_format
-import sd_protocol_pb2 as sd_protocol_pb2
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+import protobuf_.sd_protocol_pb2 as sd_protocol_pb2
 import time
 
 SERVER_IP = "3.88.99.255"
@@ -45,7 +48,7 @@ def receber_protobuf(sock, classe_resposta):
         print("Erro ao receber resposta:", e)
         raise
 
-def autenticar(sock, aluno_id, print_response=True):
+def autenticar(sock, aluno_id, print_resposta=True):
 
     try:
         req = sd_protocol_pb2.Requisicao()
@@ -58,39 +61,42 @@ def autenticar(sock, aluno_id, print_response=True):
         tempo_envio = round(t1 - t0, 3)
 
         t0_ = time.time()
-        resp = receber_protobuf(sock, sd_protocol_pb2.Resposta)
+        resposta = receber_protobuf(sock, sd_protocol_pb2.Resposta)
         t1_ = time.time()
         tempo_resposta = round(t1_ - t0_, 3)
 
         tempo_total = round(t1_ - t0, 3)
         
-        if print_response:
+        if print_resposta:
             print("\nRESPOSTA AUTH:")
-            print(json_format.MessageToJson(resp, indent=2))
+            print(json_format.MessageToJson(resposta, indent=2))
             print(f"Tempo total AUTH: {tempo_total}s")
 
-        if resp.HasField("ok"):
-            token = resp.ok.dados.get("token", "")
-            return resp, token, tempo_total, tempo_envio, tempo_resposta
+        if resposta.HasField("ok"):
+            token = resposta.ok.dados.get("token", "")
+            return resposta, token, tempo_total, tempo_envio, tempo_resposta
         else:
-            return resp, None, tempo_total, tempo_envio, tempo_resposta
+            return resposta, None, tempo_total, tempo_envio, tempo_resposta
 
     except Exception as e:
         print("Erro na autenticação:", e)
         return None, None, None, None, None
 
-def operacos_disponiveis(sock, token, operacao, parametros_mensagem="", parametros_numeros=[], print_response=True):
+def operacoes_disponiveis(sock, token, operacao, parametros=None, print_resposta=True):
 
     try:
         req = sd_protocol_pb2.Requisicao()
         req.operacao.token = token
         req.operacao.operacao = operacao
 
-        if parametros_mensagem != "":
-            req.operacao.parametros["mensagem"] = parametros_mensagem
-        elif len(parametros_numeros) > 1:
-            print("Números para soma:", parametros_numeros)
-            req.operacao.parametros["numeros"] = ",".join(parametros_numeros)
+        if parametros is not None:
+            chave_parametro = next(iter(parametros))
+            valor_parametro = parametros[chave_parametro]
+
+      
+            req.operacao.parametros[chave_parametro] = valor_parametro
+
+        
 
         t0 = time.time()
         enviar_protobuf(sock, req)
@@ -98,23 +104,23 @@ def operacos_disponiveis(sock, token, operacao, parametros_mensagem="", parametr
         tempo_envio = round(t1 - t0, 3)
 
         t0_ = time.time()
-        resp = receber_protobuf(sock, sd_protocol_pb2.Resposta)
+        resposta = receber_protobuf(sock, sd_protocol_pb2.Resposta)
         t1_ = time.time()
         tempo_resposta = round(t1_ - t0_, 3)
 
         tempo_total = round(t1_ - t0, 3)
 
-        if print_response:
+        if print_resposta:
            print(f"\nRESPOSTA {operacao.upper()}:")
-           print(json_format.MessageToJson(resp, indent=2))
+           print(json_format.MessageToJson(resposta, indent=2))
            print(f"Tempo total {operacao.upper()}: {tempo_total}s")
 
-        return resp, tempo_total, tempo_envio, tempo_resposta
+        return resposta, tempo_total, tempo_envio, tempo_resposta
     except Exception as e:
         print(f"Erro na operação {operacao}:", e)
         return None, None, None, None
 
-def enviar_info(sock, tipo, print_response=True):
+def enviar_info(sock, tipo, print_resposta=True):
 
     try:
         req = sd_protocol_pb2.Requisicao()
@@ -132,7 +138,7 @@ def enviar_info(sock, tipo, print_response=True):
 
         tempo_total = round(t1_ - t0, 3)
 
-        if print_response:
+        if print_resposta:
             print(f"\nRESPOSTA INFO: {json_format.MessageToJson(resp, indent=2)}")
             print(f"Tempo total INFO: {tempo_total}s")
 
@@ -140,9 +146,9 @@ def enviar_info(sock, tipo, print_response=True):
 
     except Exception as e:
         print("Erro ao enviar INFO:", e)
-        return None, None
+        return None, None, None, None
 
-def logout(sock, token, print_response=True):
+def logout(sock, token, print_resposta=True):
 
     try:
         req = sd_protocol_pb2.Requisicao()
@@ -162,7 +168,7 @@ def logout(sock, token, print_response=True):
 
         tempo_total = round(t1 - t0, 3)
 
-        if print_response:
+        if print_resposta:
             print(f"\nRESPOSTA LOGOUT: {json_format.MessageToJson(resp, indent=2)}")
             print(f"Tempo total LOGOUT: {tempo_total}s")
 
@@ -174,10 +180,6 @@ def logout(sock, token, print_response=True):
 
 
 def menu_operacoes(sock, token):
-    tempo_resposta_geral = []
-    tempo_envio_geral = []
-    tempo_total_geral = []
-
 
     while True:
         print("\nDigite o número da operação desejada:")
@@ -199,13 +201,12 @@ def menu_operacoes(sock, token):
         elif opc == "1":
             mensagem = str(input("Digite a mensagem para eco: "))
 
-            resp, tempo_total, tempo_envio, tempo_resposta = operacos_disponiveis(sock, token, "echo", parametros_mensagem=mensagem)
+            resp, _, _, _ = operacoes_disponiveis(sock, token, "echo", parametros={"mensagem": mensagem})
             print("Resposta ECHO:", resp)
    
 
         elif opc == "2":
            
-            # resp = operacos_disponiveis(sock, token, "SOMA", parametros=vet)
             aux = None
             numeros = []
             while aux != 'q' or aux != 'Q':
@@ -220,37 +221,49 @@ def menu_operacoes(sock, token):
                 else:
                     break
                 
-            resp, tempo_total, tempo_envio, tempo_resposta = operacos_disponiveis(sock, token, "soma", parametros_numeros=numeros)
+            resp ,_ ,_ ,_ = operacoes_disponiveis(sock, token, "soma", parametros={"numeros": ",".join(numeros)})
 
 
             print("Resposta SOMA:", resp)
             
 
         elif opc == "3":
-            resp, tempo_total, tempo_envio, tempo_resposta = operacos_disponiveis(sock, token, "status")
+            det_status = ""
+            detalhado = False
+            while True:
+                det_status = input("Deseja detalhar o status? (s/n): ")
+                if det_status not in ('s', 'n', 'S', 'N'):
+                    print("Opção inválida. Digite 's' para sim ou 'n' para não.")
+                else:
+                    if det_status in ('s', 'S'):
+                        detalhado = True
+                        break
+                    else:
+                        detalhado = False
+                        break
+            resp , _, _, _ = operacoes_disponiveis(sock, token, "status", parametros={"detalhado": str(detalhado)})
             print("STATUS:", resp)
 
         elif opc == "4":
-            resp, tempo_total, tempo_envio, tempo_resposta = operacos_disponiveis(sock, token, "historico")
+            while True:
+                limite = input("Digite o valor do limite: ")
+                if limite.isdigit():
+                    break
+                else:
+                    print("Valor inválido. Digite um número inteiro.")
+            resp, _, _, _ =  operacoes_disponiveis(sock, token, "historico", parametros={"limite": limite})
+            
             print("HISTORICO:", resp)
 
         elif opc == "5":
-            resp, tempo_total, tempo_envio, tempo_resposta = operacos_disponiveis(sock, token, "timestamp")
+            resp, _, _, _ = operacoes_disponiveis(sock, token, "timestamp")
             print("TIMESTAMP:", resp)
         else:
             print("Opção inválida!")
             continue
 
-        # tempo_resposta_geral.append(tempo_resposta)
-        # tempo_envio_geral.append(tempo_envio)
-        # tempo_total_geral.append(tempo_total)
-        
 
-        # print("\n=== TEMPOS MÉDIOS DAS OPERAÇÕES ===")
-        # print(f"Tempo médio de envio: {round(sum(tempo_envio_geral)/len(tempo_envio_geral),3)}s")
-        # print(f"Tempo médio de resposta: {round(sum(tempo_resposta_geral)/len(tempo_resposta_geral),3)}s")
-        # print(f"Tempo médio total: {round(sum(tempo_total_geral)/len(tempo_total_geral),3)}s")
- 
+
 
 def main():
     print("=== Sistema de Cliente TCP com Protobuf ===")
