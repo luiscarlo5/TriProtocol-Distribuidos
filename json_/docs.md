@@ -1,6 +1,6 @@
 # Documentação do Cliente TCP usando JSON
 
-Este documento descreve todas as funções presentes no cliente TCP baseado em JSON, explicando como cada parte foi construída, qual sua responsabilidade e como se encaixa no fluxo geral da aplicação.
+Este documento descreve todas as funções presentes no cliente TCP baseado em JSON, explicando como cada parte foi construída e para que ela é útil
 
 ---
 
@@ -67,11 +67,11 @@ Envia um JSON como:
 5. Extrai "token" da resposta.
 6. Retorna resposta, token e métricas.
 
-## **3. Função Função operacoes_disponiveis(sock, token, operacao, parametros=None, print_resposta=True)
+## **4. Função Função operacoes_disponiveis(sock, token, operacao, parametros=None, print_resposta=True)
 ### **Objetivo**
 Enviar operações genéricas ao servidor após autenticação.
 
-### **Estruturs**
+### **Estrutura**
 Exemplo de mensagem enviada:
 ```json
 {
@@ -82,116 +82,79 @@ Exemplo de mensagem enviada:
     "timestamp": "..."
 }
 ```
+### **Fluxo interno**
+1. Gera timestamp.
+2. Identifica e usa os parâmetros.
+3. Monta dicionário JSON.
+4. Envia e mede tempo.
+5. Recebe resposta JSON.
+6. Formata a saída de forma legível.
 
-Fluxo interno
-
-Gera timestamp.
-
-Identifica e usa os parâmetros.
-
-Monta dicionário JSON.
-
-Envia e mede tempo.
-
-Recebe resposta JSON.
-
-Formata a saída de forma legível.
-
-5. Função logout(sock, token, print_resposta=True)
-Objetivo
-
+## **5. Função logout(sock, token, print_resposta=True)**
+### **Objetivo**
 Finalizar a sessão ativa no servidor.
 
-Estrutura
-
+### **Estrutura**
 Mensagem enviada:
-
+```json
 {
     "tipo": "LOGOUT",
     "token": "...",
     "timestamp": "..."
 }
+```
+### **Fluxo interno**
+1. Gera timestamp.
+2. Monta dicionário LOGOUT.
+3. Envia.
+4. Recebe JSON.
+5. Exibe/retorna métricas.
 
-Fluxo interno
+## **6. Função menu_operacoes(sock, token)**
 
-Gera timestamp.
-
-Monta dicionário LOGOUT.
-
-Envia.
-
-Recebe JSON.
-
-Exibe/retorna métricas.
-
-6. Função menu_operacoes(sock, token)
-Objetivo
-
+### **Objetivo**
 Interface interativa terminal para escolha de operações.
 
-Estrutura
+### **Estrutura**
 
-Lista operações disponíveis e solicita entrada do usuário.
+#### **Lista operações disponíveis e solicita entrada do usuário.**
+#### **Operações comuns**
 
-Operações comuns
+1. echo → envia texto.
+2. soma → lista de números.
+3. status → estado atual.
+4. historico → limite do histórico.
+5. timestamp → sem parâmetros.
 
-echo → envia texto.
+### **Fluxo interno**
+- Exibe menu.
+- Usuário escolhe opção.
+- Coleta parâmetros se necessário.
+- Chama operacoes_disponiveis().
+- Repete até o usuário escolher sair.
 
-soma → lista de números.
-
-status → estado atual.
-
-historico → limite do histórico.
-
-timestamp → sem parâmetros.
-
-Fluxo interno
-
-Exibe menu.
-
-Usuário escolhe opção.
-
-Coleta parâmetros se necessário.
-
-Chama operacoes_disponiveis().
-
-Repete até o usuário escolher sair.
-
-7. Função main()
-Objetivo
-
+## **7. Função main()**
+### **Objetivo**
 Gerenciar todo o ciclo de vida do cliente JSON.
 
-Estrutura
+### **Estrutura**
+1. Cria socket TCP.
+2. Tenta conectar ao servidor por até 5 segundos.
+3. Autentica.
+4. Abre menu.
+5. Finaliza com logout e fechamento do socket.
+6. Fluxo interno
+7. Criar socket.
+8. Loop de conexão com timeout de 5s.
+9. Se conectar: enviar AUTH.
+10. Receber token.
+11. Abrir menu interativo.
+12. Usuário escolhe logout.
+13. Fechar conexão.
 
-Cria socket TCP.
-
-Tenta conectar ao servidor por até 5 segundos.
-
-Autentica.
-
-Abre menu.
-
-Finaliza com logout e fechamento do socket.
-
-Fluxo interno
-
-Criar socket.
-
-Loop de conexão com timeout de 5s.
-
-Se conectar: enviar AUTH.
-
-Receber token.
-
-Abrir menu interativo.
-
-Usuário escolhe logout.
-
-Fechar conexão.
-
-8. Estrutura geral da comunicação
+## **8. Estrutura geral da comunicação**
 Formato das mensagens
+```json
 {
     "tipo": "OP" | "AUTH" | "LOGOUT",
     "token": "...",
@@ -199,30 +162,33 @@ Formato das mensagens
     "parametros": {...},
     "timestamp": "..."
 }
+```
+### **Campos principais**
+|    Campo    |    Descrição    |
+|-------------|-----------------|
+|    tipo    |    Tipo da operação (AUTH/OP/LOGOUT)    |
+|    token    |    Token da sessão autenticada    |
+|    operacao    |	Nome da operação    |
+|    parametros    |    Dados enviados    |
+|    timestamp    |    Momento do envio    |
 
-Campos principais
-Campo	Descrição
-tipo	Tipo da operação (AUTH/OP/LOGOUT).
-token	Token da sessão autenticada.
-operacao	Nome da operação.
-parametros	Dados enviados.
-timestamp	Momento do envio.
-9. Fluxo completo resumido
 
-Criar socket TCP.
+## **9. Fluxo completo resumido**
 
-Tentar conectar (timeout 5s).
+⇒ Criar socket TCP.
 
-Enviar JSON AUTH.
+⇒ Tentar conectar (timeout 5s).
 
-Receber token.
+⇒ Enviar JSON AUTH.
 
-Abrir menu de operações.
+⇒ Receber token.
 
-Enviar operações via JSON.
+⇒ Abrir menu de operações.
 
-Receber respostas estruturadas.
+⇒ Enviar operações via JSON.
 
-Enviar LOGOUT.
+⇒ Receber respostas estruturadas.
 
-Encerrar conexão.
+⇒ Enviar LOGOUT.
+
+⇒ Encerrar conexão.
