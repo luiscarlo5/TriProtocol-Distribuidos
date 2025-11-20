@@ -191,17 +191,3 @@ Após gerar três DataFrames (um para cada protocolo),\
 é possível compará-los estatisticamente ou graficamente.
 
 ------------------------------------------------------------------------
-
-## 11. Resultado esperado
-
-O arquivo gerado permite análises como:
-
--   Comparação entre protocolos
--   Variedade de latência por operação
--   Estabilidade (desvio padrão)
--   Tempo médio total
-
-Esses dados são essenciais para estudos de performance e tomada de
-decisão entre qual protocolo é mais adequado à aplicação.
-
-------------------------------------------------------------------------
