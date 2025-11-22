@@ -9,20 +9,20 @@ Este documento resume a estrutura, objetivo e funcionamento dos três protocolos
 
 ---
 
-# Objetivo do Estudo
+# Objetivo 
 
-O estudo busca avaliar os protocolos no lado do cliente na arquitetura cliente-servidor:
+Implementar uma interface mínima para avaliar os protocolos no lado do cliente na arquitetura cliente-servidor:
 
 * **Protocol String**
 * **JSON**
 * **Protocol Buffers**
 
-para comparar:
+para comparar ao lado do cliente:
 
-* Tempo de **envio**
+* complexidade de implementação
+* Tratamento de dados
+* Envio e Recebimento de dados
 * Tempo de **resposta**
-* Tempo **total**
-* Variação (desvio padrão)
 * Custo de serialização e parsing
 * Eficiência da comunicação TCP
 
